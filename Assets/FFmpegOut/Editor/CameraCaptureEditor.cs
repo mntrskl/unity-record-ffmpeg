@@ -7,6 +7,7 @@ namespace FFmpegOut
     [CustomEditor(typeof(CameraCapture))]
     public class CameraCaptureEditor : Editor
     {
+        SerializedProperty _name;
         SerializedProperty _setResolution;
         SerializedProperty _width;
         SerializedProperty _height;
@@ -30,6 +31,7 @@ namespace FFmpegOut
 
         void OnEnable()
         {
+            _name = serializedObject.FindProperty("_name");
             _setResolution = serializedObject.FindProperty("_setResolution");
             _width = serializedObject.FindProperty("_width");
             _height = serializedObject.FindProperty("_height");
@@ -46,6 +48,7 @@ namespace FFmpegOut
             // Show the editor controls.
             serializedObject.Update();
 
+            EditorGUILayout.PropertyField(_name);
             EditorGUILayout.PropertyField(_setResolution);
 
             if (_setResolution.hasMultipleDifferentValues || _setResolution.boolValue)

@@ -9,7 +9,8 @@ namespace FFmpegOut
     {
         #region Public properties
 
-        public enum Preset {
+        public enum Preset
+        {
             ProRes422,
             ProRes4444,
             H264Default,
@@ -19,23 +20,27 @@ namespace FFmpegOut
         }
 
         public string Filename { get; private set; }
+        public string FilePath { get; private set; }
         public string Error { get; private set; }
 
         #endregion
 
         #region Public methods
 
-        public FFmpegPipe(string name, int width, int height, int framerate, Preset preset)
+        public FFmpegPipe(string directory, string name, int width, int height, int framerate, Preset preset)
         {
+            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
             name += DateTime.Now.ToString(" yyyy MMdd HHmmss");
             Filename = name.Replace(" ", "_") + GetSuffix(preset);
+            FilePath = Path.Combine(directory, Filename);
 
             var opt = "-y -f rawvideo -vcodec rawvideo -pixel_format rgba";
             opt += " -colorspace bt709";
             opt += " -video_size " + width + "x" + height;
             opt += " -framerate " + framerate;
             opt += " -loglevel warning -i - " + GetOptions(preset);
-            opt += " " + Filename;
+            opt += " " + FilePath;
 
             var info = new ProcessStartInfo(FFmpegConfig.BinaryPath, opt);
             info.UseShellExecute = false;
@@ -83,7 +88,7 @@ namespace FFmpegOut
         Process _subprocess;
         BinaryWriter _stdin;
 
-        static string [] _suffixes = {
+        static string[] _suffixes = {
             ".mp4",
             ".mp4",
             ".mp4",
@@ -92,7 +97,7 @@ namespace FFmpegOut
             ".webm"
         };
 
-        static string [] _options = {
+        static string[] _options = {
             "-pix_fmt yuv420p",
             "-pix_fmt yuv420p -preset ultrafast -crf 0",
             "-pix_fmt yuv444p -preset ultrafast -crf 0",

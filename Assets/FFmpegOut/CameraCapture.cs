@@ -8,6 +8,7 @@ namespace FFmpegOut
     {
         #region Editable properties
 
+        [SerializeField] string _name = "def";
         [SerializeField] bool _setResolution = true;
         [SerializeField] int _width = 1280;
         [SerializeField] int _height = 720;
@@ -17,6 +18,13 @@ namespace FFmpegOut
         [SerializeField] float _startTime = 0;
         [SerializeField] float _recordLength = 5;
         [SerializeField] bool _capturing = false;
+
+        #endregion
+
+        #region Accesible Properties
+
+        public bool isCapturing { get { return _capturing; } }
+        public string path { get; set; } = "Recordings";
 
         #endregion
 
@@ -57,19 +65,14 @@ namespace FFmpegOut
 
         public void CloseCapture() { _capturing = false; }
 
-        // void OnEnable()
-        // {
-        //     if (!FFmpegConfig.CheckAvailable)
-        //     {
-        //         Debug.LogError(
-        //             "ffmpeg.exe is missing. "
-        //         );
-        //         enabled = false;
-        //     }
-        // }
+        void OnEnable()
+        {
+            CaptureController.Instance.availableCaptures.Add(_name, this);
+        }
 
         void OnDisable()
         {
+            if (CaptureController.Instance.availableCaptures.ContainsKey(_name)) CaptureController.Instance.availableCaptures.Remove(_name);
             if (_pipe != null) ClosePipe();
         }
 
@@ -145,7 +148,7 @@ namespace FFmpegOut
             }
 
             // Open an output stream.
-            _pipe = new FFmpegPipe(name, width, height, _frameRate, _preset);
+            _pipe = new FFmpegPipe(path, _name, width, height, _frameRate, _preset);
             _activePipeCount++;
 
             // Change the application frame rate on the first pipe.
