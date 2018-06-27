@@ -43,13 +43,7 @@ namespace FFmpegOut
 
         #endregion
 
-        #region MonoBehavior functions
-
-        void OnValidate()
-        {
-            _startTime = Mathf.Max(_startTime, 0);
-            _recordLength = Mathf.Max(_recordLength, 0.01f);
-        }
+        #region Public Methods
 
         public void OpenCapture()
         {
@@ -62,29 +56,25 @@ namespace FFmpegOut
                 enabled = false;
             }
         }
-
         public void CloseCapture() { _capturing = false; }
 
-        void OnEnable()
-        {
-            CaptureController.Instance.availableCaptures.Add(_name, this);
-        }
+        #endregion
 
+        #region Private methods (Mono)
+
+        void OnValidate()
+        {
+            _startTime = Mathf.Max(_startTime, 0);
+            _recordLength = Mathf.Max(_recordLength, 0.01f);
+        }
+        void OnEnable() { CaptureController.Instance.Set(_name, this); }
         void OnDisable()
         {
-            if (CaptureController.Instance.availableCaptures.ContainsKey(_name)) CaptureController.Instance.availableCaptures.Remove(_name);
+            CaptureController.Instance.Del(_name);
             if (_pipe != null) ClosePipe();
         }
-
-        void OnDestroy()
-        {
-            if (_pipe != null) ClosePipe();
-        }
-
-        void Start()
-        {
-            _material = new Material(_shader);
-        }
+        void OnDestroy() { if (_pipe != null) ClosePipe(); }
+        void Start() { _material = new Material(_shader); }
 
         void Update()
         {
@@ -124,7 +114,7 @@ namespace FFmpegOut
 
         #endregion
 
-        #region Private methods
+        #region Private methods (Pipe)
 
         void OpenPipe()
         {
